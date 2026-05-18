@@ -32,7 +32,8 @@ jobs:
         run: |
           git clone --depth 1 --branch v4 https://github.com/cocos2d/cocos2d-x.git cocos2d
           cd cocos2d
-          git submodule update --init --depth 1
+          git config --global url."https://github.com/".insteadOf "git://github.com/"
+          git submodule update --init --depth 1 -- external
 
       - name: Build
         run: |
@@ -67,7 +68,8 @@ jobs:
         run: |
           git clone --depth 1 --branch v4 https://github.com/cocos2d/cocos2d-x.git cocos2d
           cd cocos2d
-          git submodule update --init --depth 1
+          git config --global url."https://github.com/".insteadOf "git://github.com/"
+          git submodule update --init --depth 1 -- external
 
       - name: Build
         run: |
