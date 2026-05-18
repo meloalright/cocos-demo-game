@@ -48,7 +48,7 @@ set(GAME_SOURCE
 )
 
 if(LINUX)
-    list(APPEND GAME_SOURCE proj.linux/main.cpp)
+    list(APPEND GAME_SOURCE proj.linux/main.cpp compat/glibc_compat.c)
 elseif(WINDOWS)
     list(APPEND GAME_SOURCE proj.win32/main.cpp)
 elseif(APPLE)
