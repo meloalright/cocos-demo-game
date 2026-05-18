@@ -19,7 +19,7 @@ public:
     CREATE_FUNC(SceneDemoTarget);
 
 private:
-    cocos2d::Color4B _bgColor = Color4B(64, 64, 64, 255);
+    cocos2d::Color4B _bgColor = cocos2d::Color4B(64, 64, 64, 255);
     std::string _transitionName;
 };
 

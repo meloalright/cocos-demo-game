@@ -65,6 +65,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew install cmake glew
+          pip3 install setuptools
 
       - name: Clone Cocos2d-x
         run: |
