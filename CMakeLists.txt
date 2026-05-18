@@ -69,11 +69,7 @@ target_link_libraries(${APP_NAME} cocos2d)
 target_include_directories(${APP_NAME} PRIVATE Classes)
 
 set(GAME_RES_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/Resources")
-if(APPLE OR WINDOWS)
-    cocos_mark_resources(FILES ${GAME_RES_FOLDER} BASEDIR ${GAME_RES_FOLDER} RESOURCEBASE Resources)
-endif()
 if(LINUX OR WINDOWS)
-    cocos_mark_multi_resources(FILES ${GAME_RES_FOLDER} BASEDIR ${GAME_RES_FOLDER})
     set(APP_RES_DIR "$<TARGET_FILE_DIR:${APP_NAME}>/Resources")
     add_custom_command(TARGET ${APP_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${GAME_RES_FOLDER} ${APP_RES_DIR}

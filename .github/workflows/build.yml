@@ -22,6 +22,7 @@ jobs:
             libx11-dev libxrandr-dev libxi-dev \
             libgl1-mesa-dev libglu1-mesa-dev \
             libglew-dev libglfw3-dev \
+            libgtk-3-dev \
             libfontconfig1-dev libfreetype-dev \
             libopenal-dev libsqlite3-dev \
             libcurl4-openssl-dev libzip-dev \
@@ -33,7 +34,8 @@ jobs:
           git clone --depth 1 --branch v4 https://github.com/cocos2d/cocos2d-x.git cocos2d
           cd cocos2d
           git config --global url."https://github.com/".insteadOf "git://github.com/"
-          git submodule update --init --depth 1 -- external
+          python3 download-deps.py --remove-download yes
+          git submodule update --init --depth 1
 
       - name: Build
         run: |
@@ -69,7 +71,8 @@ jobs:
           git clone --depth 1 --branch v4 https://github.com/cocos2d/cocos2d-x.git cocos2d
           cd cocos2d
           git config --global url."https://github.com/".insteadOf "git://github.com/"
-          git submodule update --init --depth 1 -- external
+          python3 download-deps.py --remove-download yes
+          git submodule update --init --depth 1
 
       - name: Build
         run: |
