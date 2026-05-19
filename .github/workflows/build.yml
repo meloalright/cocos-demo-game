@@ -79,14 +79,23 @@ jobs:
       - name: Patch Cocos2d-x for modern Xcode
         run: |
           cd cocos2d
-          # Fix iconv_t: Xcode 15+ changed iconv_t from void* to __tag_iconv_t*
-          # Change _iconv member from void* to iconv_t
-          sed -i '' 's/void\* _iconv = nullptr;/iconv_t _iconv = nullptr;/' cocos/2d/CCFontAtlas.h
-          # Add iconv.h include to the header
-          sed -i '' '/#include "2d\/CCLabel.h"/a\
-          #include <iconv.h>' cocos/2d/CCFontAtlas.h
-          # Remove the cast in iconv call (no longer needed with proper type)
-          sed -i '' 's/iconv(_iconv, (char\*\*)&pin/iconv(_iconv, \&pin/' cocos/2d/CCFontAtlas.cpp
+          python3 -c "
+          import re
+          # Patch header: add iconv.h include and change void* to iconv_t
+          with open('cocos/2d/CCFontAtlas.h', 'r') as f:
+              h = f.read()
+          h = h.replace('#include <unordered_map>', '#include <unordered_map>\n#if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32 && CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID)\n#include <iconv.h>\n#endif')
+          h = h.replace('void* _iconv = nullptr;', 'iconv_t _iconv = nullptr;')
+          with open('cocos/2d/CCFontAtlas.h', 'w') as f:
+              f.write(h)
+          # Patch source: fix iconv call cast
+          with open('cocos/2d/CCFontAtlas.cpp', 'r') as f:
+              s = f.read()
+          s = s.replace('iconv(_iconv, (char**)&pin', 'iconv(_iconv, &pin')
+          with open('cocos/2d/CCFontAtlas.cpp', 'w') as f:
+              f.write(s)
+          print('Patched CCFontAtlas for Xcode 15+ iconv_t compatibility')
+          "
 
       - name: Build
         run: |
