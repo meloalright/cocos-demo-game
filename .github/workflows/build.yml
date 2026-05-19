@@ -96,7 +96,8 @@ jobs:
           mkdir build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release \
             -DCOCOS2DX_ROOT_PATH=${{ github.workspace }}/cocos2d \
-            -DCMAKE_OSX_ARCHITECTURES=x86_64
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
           cmake --build . --config Release --parallel $(sysctl -n hw.logicalcpu)
 
       - name: Package
@@ -104,13 +105,13 @@ jobs:
           mkdir -p package
           cp build/cocos-demo-game package/ 2>/dev/null || true
           cp -r Resources package/
-          tar czf cocos-demo-game-macos-x64.tar.gz -C package .
+          tar czf cocos-demo-game-macos-arm64.tar.gz -C package .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cocos-demo-game-macos-x64
-          path: cocos-demo-game-macos-x64.tar.gz
+          name: cocos-demo-game-macos-arm64
+          path: cocos-demo-game-macos-arm64.tar.gz
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -127,5 +128,5 @@ jobs:
         with:
           files: |
             cocos-demo-game-linux-x64/cocos-demo-game-linux-x64.tar.gz
-            cocos-demo-game-macos-x64/cocos-demo-game-macos-x64.tar.gz
+            cocos-demo-game-macos-arm64/cocos-demo-game-macos-arm64.tar.gz
           generate_release_notes: true
