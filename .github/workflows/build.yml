@@ -80,21 +80,15 @@ jobs:
         run: |
           cd cocos2d
           python3 -c "
-          import re
-          # Patch header: add iconv.h include and change void* to iconv_t
-          with open('cocos/2d/CCFontAtlas.h', 'r') as f:
-              h = f.read()
-          h = h.replace('#include <unordered_map>', '#include <unordered_map>\n#if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32 && CC_TARGET_PLATFORM != CC_PLATFORM_ANDROID)\n#include <iconv.h>\n#endif')
-          h = h.replace('void* _iconv = nullptr;', 'iconv_t _iconv = nullptr;')
-          with open('cocos/2d/CCFontAtlas.h', 'w') as f:
-              f.write(h)
-          # Patch source: fix iconv call cast
+          # Xcode 15+ changed iconv_t from void* to __tag_iconv_t*
+          # Fix: cast void* _iconv to iconv_t at each call site in .cpp
           with open('cocos/2d/CCFontAtlas.cpp', 'r') as f:
               s = f.read()
-          s = s.replace('iconv(_iconv, (char**)&pin', 'iconv(_iconv, &pin')
+          s = s.replace('iconv_close(_iconv)', 'iconv_close((iconv_t)_iconv)')
+          s = s.replace('iconv(_iconv, (char**)&pin', 'iconv((iconv_t)_iconv, &pin')
           with open('cocos/2d/CCFontAtlas.cpp', 'w') as f:
               f.write(s)
-          print('Patched CCFontAtlas for Xcode 15+ iconv_t compatibility')
+          print('Patched CCFontAtlas.cpp for Xcode 15+ iconv_t compatibility')
           "
 
       - name: Build
