@@ -80,15 +80,27 @@ jobs:
         run: |
           cd cocos2d
           python3 -c "
-          # Xcode 15+ changed iconv_t from void* to __tag_iconv_t*
-          # Fix: cast void* _iconv to iconv_t at each call site in .cpp
+          import re
+
+          # 1. Xcode 15+ changed iconv_t from void* to __tag_iconv_t*
           with open('cocos/2d/CCFontAtlas.cpp', 'r') as f:
               s = f.read()
           s = s.replace('iconv_close(_iconv)', 'iconv_close((iconv_t)_iconv)')
           s = s.replace('iconv(_iconv, (char**)&pin', 'iconv((iconv_t)_iconv, &pin')
           with open('cocos/2d/CCFontAtlas.cpp', 'w') as f:
               f.write(s)
-          print('Patched CCFontAtlas.cpp for Xcode 15+ iconv_t compatibility')
+          print('Patched CCFontAtlas.cpp for iconv_t')
+
+          # 2. AudioCache.h missing <functional> for std::function
+          with open('cocos/audio/apple/AudioCache.h', 'r') as f:
+              s = f.read()
+          if '#include <functional>' not in s:
+              s = s.replace('#include <string>', '#include <string>\n#include <functional>', 1)
+              if '#include <functional>' not in s:
+                  s = re.sub(r'(#pragma once|#ifndef .*\n#define .*)', r'\1\n#include <functional>', s, count=1)
+              with open('cocos/audio/apple/AudioCache.h', 'w') as f:
+                  f.write(s)
+              print('Patched AudioCache.h: added #include <functional>')
           "
 
       - name: Build
