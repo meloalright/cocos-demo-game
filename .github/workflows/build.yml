@@ -79,8 +79,14 @@ jobs:
       - name: Patch Cocos2d-x for modern Xcode
         run: |
           cd cocos2d
-          # Fix iconv signature for Xcode 15+ (const char** vs char**)
-          sed -i '' 's/char \*\*pin = &in;/const char *cin = in; const char **pin = \&cin;/' cocos/2d/CCFontAtlas.cpp
+          # Fix iconv_t: Xcode 15+ changed iconv_t from void* to __tag_iconv_t*
+          # Change _iconv member from void* to iconv_t
+          sed -i '' 's/void\* _iconv = nullptr;/iconv_t _iconv = nullptr;/' cocos/2d/CCFontAtlas.h
+          # Add iconv.h include to the header
+          sed -i '' '/#include "2d\/CCLabel.h"/a\
+          #include <iconv.h>' cocos/2d/CCFontAtlas.h
+          # Remove the cast in iconv call (no longer needed with proper type)
+          sed -i '' 's/iconv(_iconv, (char\*\*)&pin/iconv(_iconv, \&pin/' cocos/2d/CCFontAtlas.cpp
 
       - name: Build
         run: |
