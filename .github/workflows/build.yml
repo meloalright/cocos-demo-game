@@ -58,7 +58,7 @@ jobs:
           path: cocos-demo-game-linux-x64.tar.gz
 
   build-macos:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,10 +76,18 @@ jobs:
           python3 download-deps.py --remove-download yes
           git submodule update --init --depth 1
 
+      - name: Patch Cocos2d-x for modern Xcode
+        run: |
+          cd cocos2d
+          # Fix iconv signature for Xcode 15+ (const char** vs char**)
+          sed -i '' 's/char \*\*pin = &in;/const char *cin = in; const char **pin = \&cin;/' cocos/2d/CCFontAtlas.cpp
+
       - name: Build
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCOCOS2DX_ROOT_PATH=${{ github.workspace }}/cocos2d
+          cmake .. -DCMAKE_BUILD_TYPE=Release \
+            -DCOCOS2DX_ROOT_PATH=${{ github.workspace }}/cocos2d \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64
           cmake --build . --config Release --parallel $(sysctl -n hw.logicalcpu)
 
       - name: Package
